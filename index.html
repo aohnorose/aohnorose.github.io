@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seoul Apartment Data Dashboard</title>
+    <!-- Simple CSS for table styling -->
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .controls { margin-bottom: 20px; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+        select, button { padding: 5px 10px; font-size: 16px; margin-right: 10px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 14px; }
+        th { background-color: #333; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        #status { font-weight: bold; margin-bottom: 10px; color: #555; }
+        #summary { margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; display: inline-block; }
+    </style>
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+    <h1>Seoul Apartment Data Dashboard</h1>
+
+    <div class="controls">
+        <label for="typeSelect">Type:</label>
+        <select id="typeSelect">
+            <option value="trade">Trade (매매)</option>
+            <option value="rent">Rent (전세)</option>
+        </select>
+
+        <label for="fileSelect">File:</label>
+        <select id="fileSelect">
+            <option>Loading manifest...</option>
+        </select>
+
+        <button id="loadBtn" disabled>Load Data</button>
+    </div>
+
+    <div id="status"></div>
+    <div id="summary"></div>
+    <div id="dataDisplay"></div>
+
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>

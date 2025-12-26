@@ -1,0 +1,23 @@
+# Python
+*.py
+__pycache__/
+*.pyc
+
+# Secrets
+gspread_key.json
+
+# Environment
+.env
+.venv
+env/
+venv/
+
+# Jekyll
+_site/
+.jekyll-cache/
+.sass-cache/
+.jekyll-metadata
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,5 @@
+title: Seoul Apartment Data
+description: Dashboard for Seoul apartment trade and rent data
+theme: jekyll-theme-slate
+plugins:
+  - jekyll-seo-tag
