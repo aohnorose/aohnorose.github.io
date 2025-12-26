@@ -30,8 +30,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
     typeSelect.addEventListener('change', () => {
+        // Sync local trend selector if it exists
+        const trendTypeSelect = document.getElementById('trendTypeSelect');
+        if (trendTypeSelect && trendTypeSelect.value !== typeSelect.value) {
+            trendTypeSelect.value = typeSelect.value;
+        }
+
         populateFileSelect();
         // Also refresh charts if they are visible
+        // We check display style to avoid unnecessary fetches, 
+        // but simple app might just fetch.
+        // The original code was:
         loadMonthlyTrend();
         loadObservedTrend();
     });
@@ -164,10 +173,22 @@ document.addEventListener('DOMContentLoaded', function () {
     // Cached stats data to avoid re-fetching on region change
     let currentStatsData = null;
     const trendRegionSelect = document.getElementById('trendRegionSelect');
+    const trendTypeSelect = document.getElementById('trendTypeSelect');
 
     trendRegionSelect.addEventListener('change', () => {
         if (currentStatsData) renderMonthlyChart(currentStatsData);
     });
+
+    if (trendTypeSelect) {
+        trendTypeSelect.addEventListener('change', () => {
+            if (typeSelect.value !== trendTypeSelect.value) {
+                typeSelect.value = trendTypeSelect.value;
+                typeSelect.dispatchEvent(new Event('change'));
+            }
+        });
+        // Initialize
+        trendTypeSelect.value = typeSelect.value;
+    }
 
     function loadMonthlyTrend() {
         const type = typeSelect.value;
