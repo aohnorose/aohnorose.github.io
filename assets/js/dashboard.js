@@ -161,6 +161,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- Chart Functions ---
 
+    // Cached stats data to avoid re-fetching on region change
+    let currentStatsData = null;
+    const trendRegionSelect = document.getElementById('trendRegionSelect');
+
+    trendRegionSelect.addEventListener('change', () => {
+        if (currentStatsData) renderMonthlyChart(currentStatsData);
+    });
+
     function loadMonthlyTrend() {
         const type = typeSelect.value;
         const url = `assets/data/stats_${type}.json`;
@@ -168,27 +176,62 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch(url)
             .then(res => res.json())
             .then(data => {
+                currentStatsData = data;
+                populateRegionSelect(data);
                 renderMonthlyChart(data);
             })
             .catch(err => console.log("No stats found or error:", err));
+    }
+
+    function populateRegionSelect(data) {
+        // Only populate if it has only "Total"
+        if (trendRegionSelect.options.length > 1) return;
+
+        // Get keys from the first available month
+        const months = Object.keys(data);
+        if (months.length === 0) return;
+
+        const firstMonthData = data[months[0]];
+        const keys = Object.keys(firstMonthData);
+
+        // Filter out '총거래수' and '월' if present
+        const guNames = keys.filter(k => k !== '총거래수' && k !== '월').sort();
+
+        guNames.forEach(gu => {
+            const option = document.createElement('option');
+            option.value = gu;
+            option.text = gu;
+            trendRegionSelect.add(option);
+        });
     }
 
     function renderMonthlyChart(data) {
         const ctx = document.getElementById('monthlyChart').getContext('2d');
         if (monthlyChart) monthlyChart.destroy();
 
-        // data format: { "1": {"총거래수": 100, ...}, "2": ... }
-        // Sort keys (months) numerically
+        const selectedRegion = trendRegionSelect.value; // "Total" or Gu name
+
+        // data format: { "1": {"총거래수": 100, "종로구": 10}, "2": ... }
         const months = Object.keys(data).sort((a, b) => Number(a) - Number(b));
-        const totalCounts = months.map(m => data[m]['총거래수']);
+
+        let chartData;
+        let chartLabel;
+
+        if (selectedRegion === "Total") {
+            chartData = months.map(m => data[m]['총거래수'] || 0);
+            chartLabel = `Total Transactions (Seoul, ${typeSelect.value})`;
+        } else {
+            chartData = months.map(m => data[m][selectedRegion] || 0);
+            chartLabel = `Transactions (${selectedRegion}, ${typeSelect.value})`;
+        }
 
         monthlyChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: months.map(m => `${m}월`),
                 datasets: [{
-                    label: 'Total Transactions (Seoul)',
-                    data: totalCounts,
+                    label: chartLabel,
+                    data: chartData,
                     backgroundColor: 'rgba(54, 162, 235, 0.6)',
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1

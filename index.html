@@ -134,6 +134,13 @@
     <!-- Monthly Trend Tab -->
     <div id="MonthlyTrend" class="tab-content">
         <h2>Monthly Trade/Rent Counts (Year to Date)</h2>
+        <div style="margin-bottom: 10px;">
+            <label for="trendRegionSelect">Region:</label>
+            <select id="trendRegionSelect">
+                <option value="Total">Seoul Total (서울시 전체)</option>
+                <!-- Options will be populated by JS -->
+            </select>
+        </div>
         <canvas id="monthlyChart"></canvas>
     </div>
 
