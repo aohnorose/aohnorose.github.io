@@ -1,0 +1,82 @@
+[
+    {
+        "observation_date": "2024-12-01",
+        "target_year": 2024,
+        "data": {
+            "11": 1000,
+            "12": 100
+        }
+    },
+    {
+        "observation_date": "2024-12-02",
+        "target_year": 2024,
+        "data": {
+            "11": 1010,
+            "12": 105
+        }
+    },
+    {
+        "observation_date": "2024-12-03",
+        "target_year": 2024,
+        "data": {
+            "11": 1020,
+            "12": 110
+        }
+    },
+    {
+        "observation_date": "2024-12-04",
+        "target_year": 2024,
+        "data": {
+            "11": 1030,
+            "12": 115
+        }
+    },
+    {
+        "observation_date": "2024-12-05",
+        "target_year": 2024,
+        "data": {
+            "11": 1040,
+            "12": 120
+        }
+    },
+    {
+        "observation_date": "2024-12-06",
+        "target_year": 2024,
+        "data": {
+            "11": 1050,
+            "12": 125
+        }
+    },
+    {
+        "observation_date": "2024-12-07",
+        "target_year": 2024,
+        "data": {
+            "11": 1060,
+            "12": 130
+        }
+    },
+    {
+        "observation_date": "2024-12-08",
+        "target_year": 2024,
+        "data": {
+            "11": 1070,
+            "12": 135
+        }
+    },
+    {
+        "observation_date": "2024-12-09",
+        "target_year": 2024,
+        "data": {
+            "11": 1080,
+            "12": 140
+        }
+    },
+    {
+        "observation_date": "2024-12-10",
+        "target_year": 2024,
+        "data": {
+            "11": 1090,
+            "12": 145
+        }
+    }
+]

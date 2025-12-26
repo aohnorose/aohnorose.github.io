@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const statusDiv = document.getElementById('status');
     const summaryDiv = document.getElementById('summary');
 
+    // Chart instances
+    let monthlyChart = null;
+    let observedChart = null;
+
     let manifest = { trade: [], rent: [] };
 
     // Fetch manifest
@@ -25,7 +29,30 @@ document.addEventListener('DOMContentLoaded', function () {
             statusDiv.textContent = "Error loading manifest: " + err.message;
         });
 
-    typeSelect.addEventListener('change', populateFileSelect);
+    typeSelect.addEventListener('change', () => {
+        populateFileSelect();
+        // Also refresh charts if they are visible
+        loadMonthlyTrend();
+        loadObservedTrend();
+    });
+
+    // Tab buttons event listeners (added in HTML onclick, but we hook here to load data)
+    window.openTab = function (evt, tabName) {
+        var i, tabcontent, tablinks;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tablinks = document.getElementsByClassName("tab-btn");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+
+        if (tabName === 'MonthlyTrend') loadMonthlyTrend();
+        if (tabName === 'ObservedTrend') loadObservedTrend();
+    }
 
     function populateFileSelect() {
         const type = typeSelect.value; // 'trade' or 'rent'
@@ -130,5 +157,108 @@ document.addEventListener('DOMContentLoaded', function () {
             summaryHtml += `<p><strong>Average Deal Amount:</strong> ${avg} (unit)</p>`;
         }
         summaryDiv.innerHTML = summaryHtml;
+    }
+
+    // --- Chart Functions ---
+
+    function loadMonthlyTrend() {
+        const type = typeSelect.value;
+        const url = `assets/data/stats_${type}.json`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                renderMonthlyChart(data);
+            })
+            .catch(err => console.log("No stats found or error:", err));
+    }
+
+    function renderMonthlyChart(data) {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        if (monthlyChart) monthlyChart.destroy();
+
+        // data format: { "1": {"총거래수": 100, ...}, "2": ... }
+        // Sort keys (months) numerically
+        const months = Object.keys(data).sort((a, b) => Number(a) - Number(b));
+        const totalCounts = months.map(m => data[m]['총거래수']);
+
+        monthlyChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months.map(m => `${m}월`),
+                datasets: [{
+                    label: 'Total Transactions (Seoul)',
+                    data: totalCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function loadObservedTrend() {
+        const type = typeSelect.value;
+        const url = `assets/data/observation_log_${type}.json`;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                renderObservedChart(data);
+            })
+            .catch(err => console.log("No observation log found or error:", err));
+    }
+
+    function renderObservedChart(data) {
+        const ctx = document.getElementById('observedChart').getContext('2d');
+        if (observedChart) observedChart.destroy();
+
+        // data format: [ { "observation_date": "...", "data": { "11": 100, "10": 90 } }, ... ]
+        // We want to track the latest "target month" found in the logs.
+        // Actually, the user wants to see how a specific month's data changed over time.
+        // Let's visualize the "Current Month" from the logs.
+
+        const labels = data.map(entry => entry.observation_date);
+
+        // Extract the counts for the month that was "current" at the time of logging
+        // Or better, let's pick the most recent target month from the last log entry and trace THAT back?
+        // Simpler approach for now: Plot the "Current Month" count as recorded in that entry. 
+        // Note that "Current Month" changes over time. 
+        // Alternatively, if the log contains multiple keys, we can plot multiple lines.
+
+        // Let's try to plot all unique target months found in the last entry
+        if (data.length === 0) return;
+
+        const lastEntry = data[data.length - 1];
+        const targetMonths = Object.keys(lastEntry.data); // e.g. ["11", "10"]
+
+        const datasets = targetMonths.map((tm, index) => {
+            // Random color
+            const color = `hsl(${index * 137.5}, 70%, 50%)`;
+
+            return {
+                label: `Month ${tm} Count`,
+                data: data.map(entry => entry.data[tm] || null), // null if not present
+                borderColor: color,
+                tension: 0.1
+            };
+        });
+
+        observedChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true
+            }
+        });
     }
 });
