@@ -187,15 +187,23 @@ document.addEventListener('DOMContentLoaded', function () {
         // Only populate if it has only "Total"
         if (trendRegionSelect.options.length > 1) return;
 
-        // Get keys from the first available month
+        // Get keys (months) from data e.g., "2024_11", "2024_12"
         const months = Object.keys(data);
         if (months.length === 0) return;
 
-        const firstMonthData = data[months[0]];
-        const keys = Object.keys(firstMonthData);
+        // Collect all unique region keys from ALL months
+        const allRegions = new Set();
+        months.forEach(m => {
+            const monthData = data[m];
+            Object.keys(monthData).forEach(k => {
+                if (k !== 'total') {
+                    allRegions.add(k);
+                }
+            });
+        });
 
-        // Filter out '총거래수' and '월' if present
-        const guNames = keys.filter(k => k !== '총거래수' && k !== '월').sort();
+        // Convert to array and sort
+        const guNames = Array.from(allRegions).sort();
 
         guNames.forEach(gu => {
             const option = document.createElement('option');
@@ -211,15 +219,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const selectedRegion = trendRegionSelect.value; // "Total" or Gu name
 
-        // data format: { "1": {"총거래수": 100, "종로구": 10}, "2": ... }
-        const months = Object.keys(data).sort((a, b) => Number(a) - Number(b));
+        // data format: { "2025_11": {"total": 100, "종로구": 10}, "2025_12": ... }
+        // Sort keys (Year_Month) naturally
+        const months = Object.keys(data).sort();
 
         let chartData;
         let chartLabel;
 
+        if (months.length === 0) return;
+
         if (selectedRegion === "Total") {
-            chartData = months.map(m => data[m]['총거래수'] || 0);
-            chartLabel = `Total Transactions (Seoul, ${typeSelect.value})`;
+            // 'total' key from python script
+            chartData = months.map(m => data[m]['total'] || 0);
+            chartLabel = `Total Transactions (Seoul Total, ${typeSelect.value})`;
         } else {
             chartData = months.map(m => data[m][selectedRegion] || 0);
             chartLabel = `Transactions (${selectedRegion}, ${typeSelect.value})`;
@@ -228,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
         monthlyChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: months.map(m => `${m}월`),
+                labels: months, // e.g. "2025_11", "2025_12"
                 datasets: [{
                     label: chartLabel,
                     data: chartData,
@@ -245,6 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
 
     function loadObservedTrend() {
         const type = typeSelect.value;
